@@ -26,7 +26,7 @@ var albumMarconi = {
         { title: 'Fits in your pocket', duration: '3:21'},
         { title: 'Can you hear me now?', duration: '3:14' },
         { title: 'Wrong phone number', duration: '2:15'}
-    ]
+    ]  
 };
 
 var albumAdele = {
@@ -53,7 +53,49 @@ var createSongRow = function(songNumber, songName, songLength) {
     + '</tr>'
     ;
  
-    return $(template);
+    var $row = $(template);
+    var clickHandler = function() {
+        var songNumber = $(this).attr('data-song-number');
+        
+        if (currentlyPlayingSong !== null) {
+		      // Revert to song number for currently playing song because user started playing new song.
+              var currentlyPlayingCell = $('.song-item-number[data-song-number="'currentlyPlayingSong + '"]');
+		      currentlyPlayingCell.html(currentlyPlayingSong);
+    }
+	if (currentlyPlayingSong !== songNumber) {
+		      // Switch from Play -> Pause button to indicate new song is playing.
+		      $(this).html(pauseButtonTemplate);
+		      currentlyPlayingSong = songNumber;
+	} else if (currentlyPlayingSong === songNumber) {
+		      // Switch from Pause -> Play button to pause currently playing song.
+		      $(this).html(playButtonTemplate);
+		      currentlyPlayingSong = null;
+	}
+};
+
+    var songNumber = $(this).attr('data-song-number');
+                    
+    var onHover = function(event) {
+        var songNumberCell = $(this).find('.song-item-number');
+        var songNumber = songNumberCell.attr('data-song-number');
+
+        if (songNumber !== currentlyPlayingSong) {
+            songNumberCell.html(playButtonTemplate);
+        }
+    };
+
+    var offHover = function(event) {
+        var songNumberCell = $(this).find('.song-item-number');
+        var songNumber = songNumberCell.attr('data-song-number');
+
+        if (songNumber !== currentlyPlayingSong) {
+            songNumberCell.html(songNumber);
+        }
+    };
+    
+    $row find('.song-item-number').click(clickHandler);
+    $row.hover(onHover, offHover);
+    return $row;
 };
 
 
@@ -78,29 +120,17 @@ var setCurrentAlbum = function(album) {
     }
 };
 
-var songListContainer = document.getElementsByClassName('album-view-song-list')[0];
-var songRows = document.getElementsByClassName('album-view-song-item');
-
 // Album button templates
 var playButtonTemplate = '<a class="album-song-button"><span class="ion-play"></spam></a';
- 
-window.onload = function() {
+var pauseButtonTemplate = '<a class="album-song-button"><span class="ion-pause"></span></a>';
+
+var currentlyPlayingSong = null;
+        
+$(document).ready(function() {}
     setCurrentAlbum(albumPicasso);
+
+});
     
-    songListContainer.addEventListener('mouseover', function(event) {
-        // #1
-        console.log(event.target);
-        // only target individual song rows during event delegation
-        if (event.target.parentElement.className === 'album-view-song-item') {
-            event.target.parentElement.querySelector('.song-item-number').innerHTML = playButtonTemplate;
-        }
-    });
-    
-    for (var i = 0; i < songRows.length; i++) {
-        songRows[i].addEventListener('mouseleave', function(event) {
-            this.children[0].innerHTML = this.children[0].getAttribute('data-song-number');
-        });
-    }
     
     var albums = [albumPicasso, albumMarconi, albumAdele]
     var index = 1;
